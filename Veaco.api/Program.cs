@@ -4,6 +4,16 @@ using Veace.api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -20,6 +30,8 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 
