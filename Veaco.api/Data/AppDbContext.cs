@@ -14,4 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<VehiclePart> VehicleParts { get; set; }
     public DbSet<SalesInvoice> SalesInvoices { get; set; }
     public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+    public DbSet<Appointment> Appointments { get; set; }
+    public DbSet<PartRequest> PartRequests { get; set; }
+    public DbSet<ServiceReview> ServiceReviews { get; set; }
 }
