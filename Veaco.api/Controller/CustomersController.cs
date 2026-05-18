@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veace.api.Data;
+using Veaco.api.Model;
 
 namespace Veaco.api.Controller;
 
@@ -42,5 +43,20 @@ public class CustomersController : ControllerBase
             .ToListAsync();
 
         return Ok(history);
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<Customer>>> SearchCustomers(string query)
+    {
+        var customers = await _context.Customers
+            .Where(c =>
+                c.FullName.ToLower().Contains(query.ToLower()) ||
+                c.Phone.Contains(query) ||
+                c.VehicleNumber.ToLower().Contains(query.ToLower()) ||
+                c.Id.ToString() == query
+            )
+            .ToListAsync();
+
+        return Ok(customers);
     }
 }
