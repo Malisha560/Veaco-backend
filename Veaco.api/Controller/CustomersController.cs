@@ -53,12 +53,23 @@ public class CustomersController : ControllerBase
         });
     }
 
-    // Feature 12: Customer self-registers (same flow, different UI context)
+    // Feature 12: Customer self-registers
     [HttpPost("self-register")]
     public async Task<IActionResult> SelfRegister(RegisterCustomerDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.Phone) || string.IsNullOrWhiteSpace(dto.Email))
-            return BadRequest("Full name, phone, and email are required.");
+        if (string.IsNullOrWhiteSpace(dto.FullName) ||
+            string.IsNullOrWhiteSpace(dto.Phone) ||
+            string.IsNullOrWhiteSpace(dto.Email) ||
+            string.IsNullOrWhiteSpace(dto.Password))
+        {
+            return BadRequest("Full name, phone, email, and password are required.");
+        }
+
+        var existingUser = await _context.AppUsers
+            .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+        if (existingUser != null)
+            return BadRequest("An account with this email already exists.");
 
         var customer = new Customer
         {
@@ -78,16 +89,28 @@ public class CustomersController : ControllerBase
         }
 
         _context.Customers.Add(customer);
+
+        var user = new AppUser
+        {
+            FullName = dto.FullName,
+            Phone = dto.Phone,
+            Email = dto.Email,
+            Role = "Customer",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+        };
+
+        _context.AppUsers.Add(user);
+
         await _context.SaveChangesAsync();
 
         return Ok(new
         {
             Message = "Registration successful. Welcome to Veaco!",
             CustomerId = customer.Id,
+            UserId = user.Id,
             customer.FullName
         });
     }
-
     // Feature 12: Update customer profile
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProfile(int id, UpdateCustomerDto dto)

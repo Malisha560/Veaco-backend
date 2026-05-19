@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Veace.api.Data;
@@ -11,9 +12,11 @@ using Veace.api.Data;
 namespace Veace.api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260519095849_AddAppUsers")]
+    partial class AddAppUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,39 +222,6 @@ namespace Veace.api.Migrations
                 });
 
             modelBuilder.Entity("Veaco.api.Model.ServiceReview", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("integer");
-
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                b.Property<int?>("AppointmentId")
-                    .HasColumnType("integer");
-
-                b.Property<string>("Comment")
-                    .IsRequired()
-                    .HasColumnType("text");
-
-                b.Property<int>("CustomerId")
-                    .HasColumnType("integer");
-
-                b.Property<int>("Rating")
-                    .HasColumnType("integer");
-
-                b.Property<DateTime>("ReviewDate")
-                    .HasColumnType("timestamp with time zone");
-
-                b.HasKey("Id");
-
-                b.HasIndex("AppointmentId");
-
-                b.HasIndex("CustomerId");
-
-                b.ToTable("ServiceReviews");
-            });
-
-            modelBuilder.Entity("Veaco.api.Model.Staff", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,31 +229,29 @@ namespace Veace.api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReviewDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Staff");
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("ServiceReviews");
                 });
 
             modelBuilder.Entity("Veaco.api.Model.Vehicle", b =>
