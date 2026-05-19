@@ -58,8 +58,15 @@ builder.Services.AddControllers()
     });
 
 // Database
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new Exception("DefaultConnection string is missing in appsettings.json");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
