@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Veace.api.Data;
@@ -11,9 +12,11 @@ using Veace.api.Data;
 namespace Veace.api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260519150330_RemoveContactPersonFromVendor")]
+    partial class RemoveContactPersonFromVendor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,79 +102,6 @@ namespace Veace.api.Migrations
                     b.ToTable("Vendors");
                 });
 
-            modelBuilder.Entity("Veaco.api.Model.AppUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppUsers");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.Appointment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AppointmentDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ServiceDescription")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("VehicleId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("Appointments");
-                });
-
             modelBuilder.Entity("Veaco.api.Model.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -179,9 +109,6 @@ namespace Veace.api.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CreditBalance")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -198,70 +125,6 @@ namespace Veace.api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.Part", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PartName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("StockQuantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("VendorId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VendorId");
-
-                    b.ToTable("Parts");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.PartRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PartName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("RequestDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("PartRequests");
                 });
 
             modelBuilder.Entity("Veaco.api.Model.SalesInvoice", b =>
@@ -326,74 +189,6 @@ namespace Veace.api.Migrations
                     b.ToTable("SalesInvoiceItems");
                 });
 
-            modelBuilder.Entity("Veaco.api.Model.ServiceReview", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AppointmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ReviewDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppointmentId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("ServiceReviews");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.Staff", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Staff");
-                });
-
             modelBuilder.Entity("Veaco.api.Model.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -432,9 +227,6 @@ namespace Veace.api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
-                        .HasColumnType("text");
-
                     b.Property<string>("PartName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -445,19 +237,41 @@ namespace Veace.api.Migrations
                     b.Property<int>("StockQuantity")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("VendorId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("VendorId");
 
                     b.ToTable("VehicleParts");
                 });
 
+            modelBuilder.Entity("veaco.Models.Part", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Parts");
+                });
+
             modelBuilder.Entity("Veace.api.Models.PurchaseItem", b =>
                 {
-                    b.HasOne("Veaco.api.Model.VehiclePart", "Part")
+                    b.HasOne("veaco.Models.Part", "Part")
                         .WithMany()
                         .HasForeignKey("PartId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -472,43 +286,6 @@ namespace Veace.api.Migrations
                     b.Navigation("Part");
 
                     b.Navigation("PurchaseInvoice");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.Appointment", b =>
-                {
-                    b.HasOne("Veaco.api.Model.Customer", "Customer")
-                        .WithMany("Appointments")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Veaco.api.Model.Vehicle", "Vehicle")
-                        .WithMany()
-                        .HasForeignKey("VehicleId");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.Part", b =>
-                {
-                    b.HasOne("Veaco.Api.Models.Vendor", "Vendor")
-                        .WithMany()
-                        .HasForeignKey("VendorId");
-
-                    b.Navigation("Vendor");
-                });
-
-            modelBuilder.Entity("Veaco.api.Model.PartRequest", b =>
-                {
-                    b.HasOne("Veaco.api.Model.Customer", "Customer")
-                        .WithMany("PartRequests")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Veaco.api.Model.SalesInvoice", b =>
@@ -541,23 +318,6 @@ namespace Veace.api.Migrations
                     b.Navigation("VehiclePart");
                 });
 
-            modelBuilder.Entity("Veaco.api.Model.ServiceReview", b =>
-                {
-                    b.HasOne("Veaco.api.Model.Appointment", "Appointment")
-                        .WithMany("ServiceReviews")
-                        .HasForeignKey("AppointmentId");
-
-                    b.HasOne("Veaco.api.Model.Customer", "Customer")
-                        .WithMany("ServiceReviews")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Appointment");
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("Veaco.api.Model.Vehicle", b =>
                 {
                     b.HasOne("Veaco.api.Model.Customer", "Customer")
@@ -569,34 +329,14 @@ namespace Veace.api.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("Veaco.api.Model.VehiclePart", b =>
-                {
-                    b.HasOne("Veaco.Api.Models.Vendor", "Vendor")
-                        .WithMany()
-                        .HasForeignKey("VendorId");
-
-                    b.Navigation("Vendor");
-                });
-
             modelBuilder.Entity("Veace.api.Models.PurchaseInvoice", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("Veaco.api.Model.Appointment", b =>
-                {
-                    b.Navigation("ServiceReviews");
-                });
-
             modelBuilder.Entity("Veaco.api.Model.Customer", b =>
                 {
-                    b.Navigation("Appointments");
-
-                    b.Navigation("PartRequests");
-
                     b.Navigation("SalesInvoices");
-
-                    b.Navigation("ServiceReviews");
 
                     b.Navigation("Vehicles");
                 });

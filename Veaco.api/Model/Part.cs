@@ -1,8 +1,8 @@
-using Veaco.Api.Models;
+﻿using Veaco.Api.Models;
 
 namespace Veaco.api.Model
 {
-    public class VehiclePart
+    public class Part
     {
         public int Id { get; set; }
         public string PartName { get; set; } = string.Empty;
@@ -11,10 +11,8 @@ namespace Veaco.api.Model
         public decimal Price { get; set; }
         public int StockQuantity { get; set; }
 
-      
         public int? VendorId { get; set; }
 
-    
         public Vendor? Vendor { get; set; }
     }
 }

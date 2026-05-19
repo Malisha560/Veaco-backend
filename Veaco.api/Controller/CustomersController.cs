@@ -21,7 +21,8 @@ public class CustomersController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> RegisterCustomer(RegisterCustomerDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.Phone) || string.IsNullOrWhiteSpace(dto.Email))
+        if (string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.Phone) ||
+            string.IsNullOrWhiteSpace(dto.Email))
             return BadRequest("Full name, phone, and email are required.");
 
         var customer = new Customer
@@ -111,6 +112,7 @@ public class CustomersController : ControllerBase
             customer.FullName
         });
     }
+
     // Feature 12: Update customer profile
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProfile(int id, UpdateCustomerDto dto)
@@ -239,12 +241,48 @@ public class CustomersController : ControllerBase
         });
     }
 
-    // Get all customers (for dropdowns)
+// Get all customers
     [HttpGet]
     public async Task<IActionResult> GetAllCustomers()
     {
         var customers = await _context.Customers
-            .Select(c => new { c.Id, c.FullName, c.Phone, c.Email })
+            .Include(c => c.Vehicles)
+            .Select(c => new
+            {
+                c.Id,
+                c.FullName,
+                c.Phone,
+                c.Email,
+                Vehicles = c.Vehicles.Select(v => new
+                {
+                    v.Id,
+                    v.VehicleNumber,
+                    v.Brand,
+                    v.Model
+                })
+            })
+            .ToListAsync();
+
+        return Ok(customers);
+    }
+
+// Feature 10: Search customers by vehicle number, phone, ID, or name
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<Customer>>> SearchCustomers(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return BadRequest("Search query is required.");
+
+        query = query.ToLower();
+
+        var customers = await _context.Customers
+            .Include(c => c.Vehicles)
+            .Where(c =>
+                c.FullName.ToLower().Contains(query) ||
+                c.Phone.Contains(query) ||
+                c.Id.ToString() == query ||
+                c.Vehicles.Any(v => v.VehicleNumber.ToLower().Contains(query))
+            )
             .ToListAsync();
 
         return Ok(customers);
