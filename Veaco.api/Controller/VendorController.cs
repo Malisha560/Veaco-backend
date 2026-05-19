@@ -1,29 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Veaco.Api.Data;
+using Veace.api.Data;
 using Veaco.Api.Models;
+using Veaco.api.DTOs;
 
-namespace Veaco.Api.Controllers
+namespace Veace.api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class VendorsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public VendorsController(ApplicationDbContext context)
+        public VendorsController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/vendors
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vendor>>> GetVendors()
         {
             return await _context.Vendors.ToListAsync();
         }
 
-        // GET: api/vendors/5
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Vendor>> GetVendor(int id)
         {
@@ -35,30 +36,42 @@ namespace Veaco.Api.Controllers
             return vendor;
         }
 
-        // POST: api/vendors
         [HttpPost]
-        public async Task<ActionResult<Vendor>> CreateVendor(Vendor vendor)
+        public async Task<ActionResult<Vendor>> CreateVendor(CreateVendorDto dto)
         {
+            var vendor = new Vendor
+            {
+                VendorName = dto.VendorName,
+                Phone = dto.Phone,
+                Email = dto.Email,
+                Address = dto.Address
+            };
+
             _context.Vendors.Add(vendor);
             await _context.SaveChangesAsync();
 
-            return Ok(vendor);
+            return CreatedAtAction(nameof(GetVendor), new { id = vendor.Id }, vendor);
         }
 
-        // PUT: api/vendors/5
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVendor(int id, Vendor vendor)
+        public async Task<IActionResult> UpdateVendor(int id, CreateVendorDto dto)
         {
-            if (id != vendor.Id)
-                return BadRequest();
+            var vendor = await _context.Vendors.FindAsync(id);
 
-            _context.Entry(vendor).State = EntityState.Modified;
+            if (vendor == null)
+                return NotFound();
+
+            vendor.VendorName = dto.VendorName;
+            vendor.Phone = dto.Phone;
+            vendor.Email = dto.Email;
+            vendor.Address = dto.Address;
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE: api/vendors/5
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVendor(int id)
         {

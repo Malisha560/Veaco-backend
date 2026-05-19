@@ -52,7 +52,7 @@ public class CustomersController : ControllerBase
             .Where(c =>
                 c.FullName.ToLower().Contains(query.ToLower()) ||
                 c.Phone.Contains(query) ||
-                c.VehicleNumber.ToLower().Contains(query.ToLower()) ||
+                c.Vehicles.Any(v => v.VehicleNumber.ToLower().Contains(query.ToLower())) ||
                 c.Id.ToString() == query
             )
             .ToListAsync();

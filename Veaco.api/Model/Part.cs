@@ -1,22 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Numerics;
+﻿using Veaco.Api.Models;
 
-namespace veaco.Models
+namespace Veaco.api.Model
 {
     public class Part
     {
         public int Id { get; set; }
+        public string PartName { get; set; } = string.Empty;
 
-        [Required]
-        public string Name { get; set; }
-
-        public string Category { get; set; }
-
+        public string? Category { get; set; }
         public decimal Price { get; set; }
-
         public int StockQuantity { get; set; }
 
-        public int VendorId { get; set; }
-        public Vendor Vendor { get; set; }
+        public int? VendorId { get; set; }
+
+        public Vendor? Vendor { get; set; }
     }
 }

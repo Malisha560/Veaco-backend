@@ -16,64 +16,83 @@ namespace Veace.api.Controllers
             _context = context;
         }
 
-        // ✅ CREATE PURCHASE INVOICE + UPDATE STOCK
-        [HttpPost]
-        public async Task<IActionResult> CreateInvoice(PurchaseInvoice invoice)
+        // CREATE PURCHASE ITEMS + UPDATE STOCK
+        [HttpPost("items")]
+        public async Task<IActionResult> CreatePurchaseItems(List<PurchaseItem> items)
         {
-            if (invoice.Items == null || !invoice.Items.Any())
-                return BadRequest("Invoice must contain items.");
+            if (items == null || !items.Any())
+                return BadRequest("Purchase must contain items.");
 
             decimal total = 0;
 
-            foreach (var item in invoice.Items)
+            foreach (var item in items)
             {
                 var part = await _context.Parts.FindAsync(item.PartId);
 
                 if (part == null)
                     return BadRequest($"Part with ID {item.PartId} not found.");
 
-                // 🔥 STOCK UPDATE (IMPORTANT FOR MARKS)
+                // UPDATE STOCK
                 part.StockQuantity += item.Quantity;
 
-                // 🔥 CALCULATE TOTAL
+                // CALCULATE TOTAL
                 total += item.Quantity * item.Price;
             }
 
-            invoice.TotalAmount = total;
+            // Create a purchase invoice and attach items
+            var invoice = new PurchaseInvoice
+            {
+                InvoiceDate = DateTime.UtcNow,
+                TotalAmount = total,
+                Items = items
+            };
 
             _context.PurchaseInvoices.Add(invoice);
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                message = "Purchase Invoice Created Successfully",
-                totalAmount = total
+                message = "Purchase Items Created Successfully",
+                totalAmount = total,
+                itemsCount = items.Count
             });
         }
 
-        // ✅ GET ALL INVOICES
-        [HttpGet]
-        public async Task<IActionResult> GetInvoices()
+        // GET ALL PURCHASE ITEMS
+        [HttpGet("items")]
+        public async Task<IActionResult> GetPurchaseItems()
         {
-            var invoices = await _context.PurchaseInvoices
-                .Include(i => i.Items)
+            var items = await _context.PurchaseItems
+                .Include(i => i.Part)
                 .ToListAsync();
 
-            return Ok(invoices);
+            return Ok(items);
         }
 
-        // ✅ GET SINGLE INVOICE
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetInvoice(int id)
+        // GET PURCHASE ITEM BY ID
+        [HttpGet("items/{id}")]
+        public async Task<IActionResult> GetPurchaseItem(int id)
         {
-            var invoice = await _context.PurchaseInvoices
-                .Include(i => i.Items)
+            var item = await _context.PurchaseItems
+                .Include(i => i.Part)
                 .FirstOrDefaultAsync(i => i.Id == id);
 
-            if (invoice == null)
+            if (item == null)
                 return NotFound();
 
-            return Ok(invoice);
+            return Ok(item);
+        }
+
+        // GET PURCHASE ITEMS BY PART
+        [HttpGet("items/part/{partId}")]
+        public async Task<IActionResult> GetPurchaseItemsByPart(int partId)
+        {
+            var items = await _context.PurchaseItems
+                .Include(i => i.Part)
+                .Where(i => i.PartId == partId)
+                .ToListAsync();
+
+            return Ok(items);
         }
     }
 }
