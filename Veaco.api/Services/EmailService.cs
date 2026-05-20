@@ -87,7 +87,6 @@ public class EmailService
         await SendEmailAsync(toEmail, customerName, subject, htmlBody);
     }
 
-
     // Send low stock alert email to admin wala feature
     // Called when a vehicle part has stock below 10 units
 
@@ -97,7 +96,7 @@ public class EmailService
 
         var htmlBody = $@"
             <div style='font-family:Arial,sans-serif;max-width:600px;margin:auto;'>
-                <h2 style='background:#dc2626;color:white;padding:20px;margin:0;'>⚠ Low Stock Alert</h2>
+                <h2 style='background:#dc2626;color:white;padding:20px;margin:0;'>Low Stock Alert</h2>
                 <div style='padding:20px;'>
                     <p>This is an automated notification from the Veaco system.</p>
                     <p>The following part has fallen below the minimum stock level of 10 units:</p>

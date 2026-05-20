@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Veace.api.Data;
-
+using Veaco.api.Services;
 
 namespace Veaco.api.Controller;
 
@@ -10,10 +10,12 @@ namespace Veaco.api.Controller;
 public class CustomerReportsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly EmailService _emailService;
 
-    public CustomerReportsController(AppDbContext context)
+    public CustomerReportsController(AppDbContext context, EmailService emailService)
     {
         _context = context;
+        _emailService = emailService;
     }
 
     [HttpGet("regular-customers")]
@@ -83,11 +85,39 @@ public class CustomerReportsController : ControllerBase
                 c.FullName,
                 c.Phone,
                 c.Email,
-                c.CreditBalance
+                c.CreditBalance,
+                c.CreditUpdatedAt
             })
             .OrderByDescending(c => c.CreditBalance)
             .ToListAsync();
 
         return Ok(pendingCredits);
+    }
+
+    [HttpPost("send-credit-reminders")]
+    public async Task<IActionResult> SendCreditReminders()
+    {
+        var overdueCustomers = await _context.Customers
+            .Where(c =>
+                c.CreditBalance > 0 &&
+                c.CreditUpdatedAt != null &&
+                c.CreditUpdatedAt <= DateTime.UtcNow.AddMonths(-1)
+            )
+            .ToListAsync();
+
+        foreach (var customer in overdueCustomers)
+        {
+            await _emailService.SendCreditReminderEmailAsync(
+                customer.Email,
+                customer.FullName,
+                customer.CreditBalance
+            );
+        }
+
+        return Ok(new
+        {
+            message = "Credit reminder emails sent.",
+            totalSent = overdueCustomers.Count
+        });
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using Veace.api.Data;
 using Veaco.api.DTO;
 using Veaco.api.Model;
@@ -21,9 +22,32 @@ public class CustomersController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> RegisterCustomer(RegisterCustomerDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.Phone) ||
-            string.IsNullOrWhiteSpace(dto.Email))
-            return BadRequest("Full name, phone, and email are required.");
+        if (string.IsNullOrWhiteSpace(dto.FullName) ||
+            string.IsNullOrWhiteSpace(dto.Phone) ||
+            string.IsNullOrWhiteSpace(dto.Email) ||
+            string.IsNullOrWhiteSpace(dto.Password))
+        {
+            return BadRequest("Full name, phone, email, and password are required.");
+        }
+
+        var emailChecker = new EmailAddressAttribute();
+
+        if (!emailChecker.IsValid(dto.Email))
+        {
+            return BadRequest("Please enter a valid email address.");
+        }
+
+        var existingUser = await _context.AppUsers
+            .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+        if (existingUser != null)
+            return BadRequest("An account with this email already exists.");
+
+        var existingCustomer = await _context.Customers
+            .FirstOrDefaultAsync(c => c.Email == dto.Email);
+
+        if (existingCustomer != null)
+            return BadRequest("Customer with this email already exists.");
 
         var customer = new Customer
         {
@@ -43,17 +67,29 @@ public class CustomersController : ControllerBase
         }
 
         _context.Customers.Add(customer);
+
+        var user = new AppUser
+        {
+            FullName = dto.FullName,
+            Phone = dto.Phone,
+            Email = dto.Email,
+            Role = "Customer",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+        };
+
+        _context.AppUsers.Add(user);
+
         await _context.SaveChangesAsync();
 
         return Ok(new
         {
             Message = "Customer registered successfully.",
             CustomerId = customer.Id,
+            UserId = user.Id,
             customer.FullName,
             VehiclesAdded = customer.Vehicles.Count
         });
     }
-
     // Feature 12: Customer self-registers
     [HttpPost("self-register")]
     public async Task<IActionResult> SelfRegister(RegisterCustomerDto dto)

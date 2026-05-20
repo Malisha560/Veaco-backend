@@ -55,7 +55,7 @@ public class NotificationsController : ControllerBase
         var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
 
         // yo code le  customer IDs that have at least one invoice older than 1 month find garcha 
-       
+
         var customerIdsWithOldInvoices = await _context.SalesInvoices
             .Where(i => i.InvoiceDate <= oneMonthAgo)
             .Select(i => i.CustomerId)
@@ -84,7 +84,7 @@ public class NotificationsController : ControllerBase
         });
     }
 
-   
+
     // GET api/notifications/summary
     //Returns a quick count of low stock parts and overdue customers wala freature
     // Used by the frontend dashboard to show a notification badge/card
@@ -93,28 +93,34 @@ public class NotificationsController : ControllerBase
     {
         var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
 
-        // Count how many parts are low on stock
-        var lowStockCount = await _context.VehicleParts
-            .CountAsync(p => p.StockQuantity < 10);
+        var lowStockItems = await _context.VehicleParts
+            .Where(p => p.StockQuantity < 10)
+            .Select(p => new
+            {
+                id = p.Id,
+                partName = p.PartName,
+                stockQuantity = p.StockQuantity,
+                price = p.Price
+            })
+            .OrderBy(p => p.stockQuantity)
+            .ToListAsync();
 
-        //Get customer IDs with old invoices 
         var customerIdsWithOldInvoices = await _context.SalesInvoices
             .Where(i => i.InvoiceDate <= oneMonthAgo)
             .Select(i => i.CustomerId)
             .Distinct()
             .ToListAsync();
 
-        //  Count customers with credit balance in that list
         var overdueCreditsCount = await _context.Customers
             .CountAsync(c => c.CreditBalance > 0 &&
                              customerIdsWithOldInvoices.Contains(c.Id));
 
         return Ok(new
         {
-            LowStockCount = lowStockCount,
-            OverdueCreditsCount = overdueCreditsCount,
-            // Total alerts combined for the notification badge on the dashboard
-            TotalAlerts = lowStockCount + overdueCreditsCount
+            lowStockItems = lowStockItems,
+            lowStockCount = lowStockItems.Count,
+            overdueCreditsCount = overdueCreditsCount,
+            totalAlerts = lowStockItems.Count + overdueCreditsCount
         });
     }
 }

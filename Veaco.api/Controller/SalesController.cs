@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Veace.api.Data;
 using Veaco.api.DTO;
 using Veaco.api.Model;
+using Veaco.api.Services;
 
 namespace Veaco.api.Controller;
 
@@ -11,10 +12,12 @@ namespace Veaco.api.Controller;
 public class SalesController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly EmailService _emailService;
 
-    public SalesController(AppDbContext context)
+    public SalesController(AppDbContext context, EmailService emailService)
     {
         _context = context;
+        _emailService = emailService;
     }
 
     [HttpPost("create-invoice")]
@@ -30,6 +33,7 @@ public class SalesController : ControllerBase
 
         decimal subTotal = 0;
         var invoiceItems = new List<SalesInvoiceItem>();
+        var itemDescriptions = new List<string>();
 
         foreach (var item in dto.Items)
         {
@@ -52,10 +56,15 @@ public class SalesController : ControllerBase
             invoiceItems.Add(new SalesInvoiceItem
             {
                 VehiclePartId = part.Id,
+                VehiclePart = part,
                 Quantity = item.Quantity,
                 UnitPrice = part.Price,
                 LineTotal = lineTotal
             });
+
+            itemDescriptions.Add(
+                $"{item.Quantity} x {part.PartName} - Rs. {lineTotal:F2}"
+            );
         }
 
         decimal discountAmount = subTotal > 5000 ? subTotal * 0.10m : 0;
@@ -70,8 +79,21 @@ public class SalesController : ControllerBase
             Items = invoiceItems
         };
 
+        customer.CreditBalance += (int)grandTotal;
+        customer.CreditUpdatedAt = DateTime.UtcNow;
+
         _context.SalesInvoices.Add(invoice);
         await _context.SaveChangesAsync();
+
+        await _emailService.SendInvoiceEmailAsync(
+            customer.Email,
+            customer.FullName,
+            invoice.Id,
+            invoice.SubTotal,
+            invoice.DiscountAmount,
+            invoice.GrandTotal,
+            itemDescriptions
+        );
 
         return Ok(new
         {
@@ -79,7 +101,8 @@ public class SalesController : ControllerBase
             InvoiceId = invoice.Id,
             SubTotal = invoice.SubTotal,
             DiscountAmount = invoice.DiscountAmount,
-            GrandTotal = invoice.GrandTotal
+            GrandTotal = invoice.GrandTotal,
+            EmailSentTo = customer.Email
         });
     }
 

@@ -27,7 +27,7 @@ namespace Veace.api.Controllers
 
             foreach (var item in items)
             {
-                var part = await _context.Parts.FindAsync(item.PartId);
+                var part = await _context.VehicleParts.FindAsync(item.PartId);
 
                 if (part == null)
                     return BadRequest($"Part with ID {item.PartId} not found.");

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Veace.api.Data;
 using Veaco.api.DTOs;
 using Veaco.api.Model;
+using Veaco.api.Services;
 
 namespace Veaco.api.Controllers
 {
@@ -11,13 +12,14 @@ namespace Veaco.api.Controllers
     public class PartsApiController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly EmailService _emailService;
 
-        public PartsApiController(AppDbContext context)
+        public PartsApiController(AppDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
-        // GET ALL
         [HttpGet]
         public async Task<IActionResult> GetParts()
         {
@@ -37,7 +39,6 @@ namespace Veaco.api.Controllers
             return Ok(parts);
         }
 
-        // GET BY ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPart(int id)
         {
@@ -61,7 +62,6 @@ namespace Veaco.api.Controllers
             return Ok(dto);
         }
 
-        // CREATE
         [HttpPost]
         public async Task<IActionResult> CreatePart(CreatePartDto dto)
         {
@@ -77,10 +77,17 @@ namespace Veaco.api.Controllers
             _context.VehicleParts.Add(part);
             await _context.SaveChangesAsync();
 
+            if (part.StockQuantity < 10)
+            {
+                await _emailService.SendLowStockNotificationAsync(
+                    part.PartName,
+                    part.StockQuantity
+                );
+            }
+
             return Ok(part);
         }
 
-        // UPDATE
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePart(int id, UpdatePartDto dto)
         {
@@ -97,10 +104,17 @@ namespace Veaco.api.Controllers
 
             await _context.SaveChangesAsync();
 
+            if (part.StockQuantity < 10)
+            {
+                await _emailService.SendLowStockNotificationAsync(
+                    part.PartName,
+                    part.StockQuantity
+                );
+            }
+
             return Ok(part);
         }
 
-        // DELETE
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePart(int id)
         {
